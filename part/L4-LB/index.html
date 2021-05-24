@@ -35,7 +35,323 @@
             layer 4 load balancing:
         </h1>
 
-        لود بالانسر لایه 4 نوعی لود بالانسر است که تغیری در بسته ها ایجاد نمی‌کند و صرفا بسته ها را بر اساس سشن TCP  به سرور مقصد ارسال می‌کند.
+        لود بالانسر لایه 4 نوعی لود بالانسر است که تغیری در بسته ها ایجاد نمی‌کند و صرفا بسته ها را بر اساس سشن TCP به سرور مقصد ارسال می‌کند. چون این نوع load-balancer مانند Route صرفا بسته ها را به سمت سرور مقصد ارسال می‌کنند و تغیری در بسته ایجاد نمی‌کنند در لود های بالا عمل کرد مناسبی دارند. (البته Des MAC بسته ها تغیر می‌کند)
+
+         <h1 dir="ltr" style="margin-top: 1em;">
+            DSR (Direct Server Return):
+        </h1>
+
+        لود بالانسر های لایه 4 از حالت DSR برای load balancing استفاده می‌کنند. همانطور که در تصویری زیر مشخص است بسته های ورودی از روتر به
+        load-balancer
+        VIP (virtual IP address)
+        ارسال می‌شوند - سپس load-balancer با توجه به سشن TCP بسته ها را به سرور ها ارسال می‌کند. load-balancer میداند که کدام TCP Session را به کدام سرور ارسال کرده و تمام پکت های دیگر این سشن را نیز برای همان سرور ارسال می‌کند.
+        <br>
+        بسته های خروجی سرور ها هم به صورت مستقیم به router ارسال می‌شوند و دیگر کاری به load-balancer ندارند.
+
+        <img src="./DSR.png" style="display: block;margin-left: auto;margin-right: auto;width: 300px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+
+        Data flow
+        پکت  در تصویر زیر مشخص است - src پکتی که به سرور میرسد برابر با
+        load-balancer
+        VIP
+        است و اگر
+        load-balancer
+        VIP
+        در سرور تعریف نشده باشد - سرور به در خواست پاسخ نمی‌دهد پس باید
+        load-balancer
+        VIP
+        را در loopback سرور تعریف کرد. (این موضوع یکی از معایب DSR است)
+        <img src="https://www.haproxy.com/wp-content/uploads/2011/07/layer4_dsr_data_flow.png" style="display: block;margin-left: auto;margin-right: auto;width: 500px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+        <h1 style="margin-top: 1em;">
+        DSR
+        در
+        anycast:
+        </h1>
+
+        اگه شبکه anycast ECMP ای داشته باشیم میتوان با استفاده از DSR
+        packet flow
+        رو توی این شبکه کنترول کرد.
+        کلود ها مثل cloudflare ویا AWS از DSR برای کنترول packet flow در شبکه استفاده میکنند.
+        مثلا درخواست کاربری از مشهد به سمت تهران Route شد - در load-balancer تهران اون درخواست رو به مشهد route کرد تا پاسخ کاربر از مشهد ارسال شود.
+
+        <h1 style="margin-top: 1em;">
+            محیط اجرا:
+        </h1>
+        برنامه لینوکسی یا در کرنل اجرا میشود یا kernel را bypass می‌کند. بخش زیادی از بازدهی load-balancer رو محیط اجرا مشخص می‌کند:
+        <img src="./ch-01.png" style="display: block;margin-left: auto;margin-right: auto;width: 300px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+
+        <h1 dir="ltr" style="margin-top: 1em;">
+            XDP (eXpress Data Path):
+        </h1>
+        یک high performance data path که بر پایه eBPF کار می‌کنه و این قابلیت رو به وجود میاره که پکت های شبکه در پایین ترین نقطه پردازش شوند:
+        <img src="./0a0135c115834e94bae60af14b87b3f8.png" style="display: block;margin-left: auto;margin-right: auto;width: 500px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+        <h1 style="margin-top: 1em;">
+        معرفی Layer 4 Load Balancer ها :
+        </h1>
+
+        <h2 >
+        seesaw :
+        </h2>
+        به عنوان برنامه در user-space اجرا میشود
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+
+            <tr>
+                <td style="text-align: center;width: 150px;">تولید کننده</td>
+                <td>Goolge</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">زبان برنامه</td>
+                <td>Go</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">کلاسترینگ</td>
+                <td>قابلیت کلاستر شدن داره</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">لایسنس</td>
+                <td>Apache 2.0</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">پشتیبانی از anycast</td>
+                <td>بله</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">موارد استفاده</td>
+                <td>on-prem GKE</td>
+            </tr>
+
+        </table>
+
+        <br>
+
+        <h3>
+        performance:
+        </h3>
+
+        <img src="./seesaw.png" style="display: block;margin-left: auto;margin-right: auto;width: 700px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+        <h2 >
+        Unimog :
+        </h2>
+
+        در eBPF - XDP اجرا می‌شود
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+
+            <tr>
+                <td style="text-align: center;width: 150px;">تولید کننده</td>
+                <td>Cloudflare</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">زبان برنامه</td>
+                <td>?</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">کلاسترینگ</td>
+                <td>قابلیت کلاستر شدن داره</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">لایسنس</td>
+                <td>Private</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">پشتیبانی از anycast</td>
+                <td>بله</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">موارد استفاده</td>
+                <td>Cloudflare CDN</td>
+            </tr>
+
+
+        </table>
+
+        <br>
+
+        تصویر زیر نشان دهنده لود سرور های لبه Cloudflare در یکی از دیتاسنتر ها بعد از مهاجرت به Unimog است:
+
+        <img src="./unimog.png" style="display: block;margin-left: auto;margin-right: auto;width: 700px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+        <h2 >
+        GLB :
+        </h2>
+
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+
+            <tr>
+                <td style="text-align: center;width: 150px;">تولید کننده</td>
+                <td>GitHub</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">زبان برنامه</td>
+                <td>C</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">کلاسترینگ</td>
+                <td>قابلیت کلاستر شدن داره</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">لایسنس</td>
+                <td>BSD 3-Clause</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">پشتیبانی از anycast</td>
+                <td>بله</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">موارد استفاده</td>
+                <td>تمام سرویس های github</td>
+            </tr>
+
+        </table>
+
+        <br>
+
+        <h2 >
+        dpvs  :
+        </h2>
+
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+
+            <tr>
+                <td style="text-align: center;width: 150px;">تولید کننده</td>
+                <td>iQIYI</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">زبان برنامه</td>
+                <td>C</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">کلاسترینگ</td>
+                <td>قابلیت کلاستر شدن داره</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">لایسنس</td>
+                <td>GPLv2</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">پشتیبانی از anycast</td>
+                <td>?</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">موارد استفاده</td>
+                <td>?</td>
+            </tr>
+
+        </table>
+
+        <img src="./dpvs.png" style="display: block;margin-left: auto;margin-right: auto;width: 700px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+        <br>
+
+        <h2 >
+        relayd  :
+        </h2>
+
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+
+            <tr>
+                <td style="text-align: center;width: 150px;">تولید کننده</td>
+                <td>OpenBSD</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">زبان برنامه</td>
+                <td>C</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">کلاسترینگ</td>
+                <td>قابلیت کلاستر شدن داره - CARP</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">لایسنس</td>
+                <td>?</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">پشتیبانی از anycast</td>
+                <td>?</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">موارد استفاده</td>
+                <td>?</td>
+            </tr>
+
+        </table>
+
+        <br>
+
+        <h2 >
+        katran  :
+        </h2>
+        در eBPF - XDP هم اجرا می‌شود
+
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+
+            <tr>
+                <td style="text-align: center;width: 150px;">تولید کننده</td>
+                <td>facebook</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">زبان برنامه</td>
+                <td>++C</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">کلاسترینگ</td>
+                <td>قابلیت کلاستر شدن داره</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">لایسنس</td>
+                <td>GNU General Public</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">پشتیبانی از anycast</td>
+                <td>بله</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;">موارد استفاده</td>
+                <td>facebook و بازار</td>
+            </tr>
+
+        </table>
+        بنچ مارک Load balancing
+        <img src="https://images3.programmersought.com/726/b2/b252cd199c157e137bd49d6a4c05e3c6.png" style="display: block;margin-left: auto;margin-right: auto;width: 700px;margin-top: 0.8rem;margin-bottom: 0.8rem;"/>
+
+        <br>
+
+
+
 
     </article>
 
