@@ -93,6 +93,86 @@
         معرفی Layer 4 Load Balancer ها :
         </h1>
 
+        <h1 style="margin-top: 1em;">
+            الگوریتم ها:
+        </h1>
+        <table style="width: 100%;margin-top: 0.8rem;margin-bottom: 0.8rem;">
+            <tr>
+                <th style="text-align: center;width: 150px;">scheduler</th>
+                <th>توضیحات</th>
+            </tr>
+            <tr>
+                <td style="text-align: center;width: 150px;">RR (Robin Robin)</td>
+                <td>درخواست ها را به طور مساوی بین سرور ها توزیع می‌کند</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">WRR<br>(Weighted Round Robin)</td>
+                <td>
+                درخواست ها را بر اساس وزن بین سرور ها توزیع می‌کند
+                به طوری که سروری که وزن بیشتری داشته باشد کار بیشتری را دریافت می‌کند
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">LC (Least-Connection)</td>
+                <td>درخواست ها را به سروری که کمترین کانکشن فعال را دارد ارسال می‌کند</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">WLC (Weighted Least-Connection)</td>
+                <td>درخواست ها را بر اساس وزن سرور ها به سروری که کمترین کانکشن فعال را دارد ارسال می‌کند</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">LBLC (Locality-Based Least-Connection)</td>
+                <td>درخواست ها هر IP را به یک سرور ارسال می‌کند اگر سرور مقصد overloaded نباشد و دردسترس باشد</td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">LBLCR (Locality-Based<br>Least-Connection with Replication)</td>
+                <td>مانند
+                LBLC
+                است ولی سرور ها گروه بندی می‌شوند و درخواست ها هر گروه به سروری ارسال میشود که کمترین کانکشن Live را دارد. این روش برای proxy-cache مناسب است
+                </td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">DH (Destination Hashing)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">SH (Source Hashing)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">SED (Shortest Expected Delay)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">NQ (Never Queue)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">MH (Maglev Hashing)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">FO (Weighted Fail Over)</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td style="text-align: center;width: 150px;">OVF (Overflow-Connection)</td>
+                <td></td>
+            </tr>
+        </table>
+
         <h2 >
         seesaw :
         </h2>
@@ -128,6 +208,12 @@
                 <td style="text-align: center;">موارد استفاده</td>
                 <td>on-prem GKE</td>
             </tr>
+
+            <tr>
+                <td style="text-align: center;">الگوریتم ها</td>
+                <td>RR, ERR, LC, WLC, SH, MH</td>
+            </tr>
+
 
         </table>
 
@@ -350,9 +436,18 @@
 
         <br>
 
+        <h2 >
+        Gobetween  :
+        </h2>
 
 
+        <h2 >
+        ZEVENET  :
+        </h2>
 
+        <h2 >
+        HAProxy  :
+        </h2>
     </article>
 
 </section>
